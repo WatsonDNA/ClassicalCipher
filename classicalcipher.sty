@@ -178,12 +178,12 @@
     {\clci@make@space@letter\clci@natural@decode@affine}}
 
 \def\clci@control@affine[#1]#2#3#4{%
-	\bgroup
-	\clci@control@space@true
-	\clci@letter@count=\m@ne
-	\clci@length=#1\relax
-	\clci@affine{#4}{#2}{#3}%
-	\egroup
+  \bgroup
+  \clci@control@space@true
+  \clci@letter@count=\m@ne
+  \clci@length=#1\relax
+  \clci@affine{#4}{#2}{#3}%
+  \egroup
 }
 
 \def\clci@natural@affine#1#2#3{%
@@ -379,34 +379,34 @@
     {\clci@make@space@letter\clci@control@decode@vernam[\m@ne]}}
 
 \def\clci@control@vernam[#1]#2#3{%
-	\bgroup
-	\clci@control@space@true
-	\clci@letter@count=\m@ne
-	\clci@length=#1\relax
+  \bgroup
+  \clci@control@space@true
+  \clci@letter@count=\m@ne
+  \clci@length=#1\relax
   \expandafter\edef\expandafter\clci@natural@str\expandafter{%
   \romannumeral-`0\clci@space@convert{#3}}%
   \expandafter\edef\expandafter\clci@natural@key\expandafter{%
   \romannumeral-`0\clci@space@convert{#2}}%
-	\expandafter\expandafter\expandafter\clci@vernam\expandafter\expandafter\expandafter
-	  {\expandafter\clci@natural@str\expandafter}\expandafter{\clci@natural@key}%
-	\egroup
-	\clci@make@space@other
+  \expandafter\expandafter\expandafter\clci@vernam\expandafter\expandafter\expandafter
+    {\expandafter\clci@natural@str\expandafter}\expandafter{\clci@natural@key}%
+  \egroup
+  \clci@make@space@other
 }
 
 \def\clci@control@decode@vernam[#1]#2#3{%
-	\bgroup
-	\clci@encode@false
-	\clci@control@space@true
-	\clci@letter@count=\m@ne
-	\clci@length=#1\relax
+  \bgroup
+  \clci@encode@false
+  \clci@control@space@true
+  \clci@letter@count=\m@ne
+  \clci@length=#1\relax
   \expandafter\edef\expandafter\clci@natural@str\expandafter{%
   \romannumeral-`0\clci@space@convert{#3}}%
   \expandafter\edef\expandafter\clci@natural@key\expandafter{%
   \romannumeral-`0\clci@space@convert{#2}}%
-	\expandafter\expandafter\expandafter\clci@vernam\expandafter\expandafter\expandafter
-	  {\expandafter\clci@natural@str\expandafter}\expandafter{\clci@natural@key}%
-	\egroup
-	\clci@make@space@other
+  \expandafter\expandafter\expandafter\clci@vernam\expandafter\expandafter\expandafter
+    {\expandafter\clci@natural@str\expandafter}\expandafter{\clci@natural@key}%
+  \egroup
+  \clci@make@space@other
 }
 
 \def\clci@vernam#1#2{%
@@ -449,31 +449,31 @@
     {\clci@make@space@letter\clci@control@decode@binvernam[\m@ne]}}
 
 \def\clci@control@binvernam[#1]#2#3{%
-	\bgroup
-	\clci@control@space@true
-	\clci@letter@count=\m@ne
-	\clci@length=#1\relax
+  \bgroup
+  \clci@control@space@true
+  \clci@letter@count=\m@ne
+  \clci@length=#1\relax
   \expandafter\edef\expandafter\clci@natural@key\expandafter{%
   \romannumeral-`0\clci@space@convert{#2}}%
   \expandafter\edef\expandafter\clci@natural@str\expandafter{%
   \romannumeral-`0\clci@space@convert{#3}}%
-	\expandafter\expandafter\expandafter\clci@binvernam\expandafter\expandafter\expandafter
-	  {\expandafter\clci@natural@key\expandafter}\expandafter{\clci@natural@str}%
-	\egroup
-	\clci@make@space@other
+  \expandafter\expandafter\expandafter\clci@binvernam\expandafter\expandafter\expandafter
+    {\expandafter\clci@natural@key\expandafter}\expandafter{\clci@natural@str}%
+  \egroup
+  \clci@make@space@other
 }
 
 \def\clci@control@decode@binvernam[#1]#2#3{%
-	\bgroup
-	\clci@encode@false
-	\clci@control@space@true
-	\clci@letter@count=\m@ne
-	\clci@length=#1\relax
+  \bgroup
+  \clci@encode@false
+  \clci@control@space@true
+  \clci@letter@count=\m@ne
+  \clci@length=#1\relax
   \expandafter\edef\expandafter\clci@natural@key\expandafter{%
   \romannumeral-`0\clci@space@convert{#2}}%
-	\expandafter\clci@binvernam\expandafter{\clci@natural@key}{#3}%
-	\egroup
-	\clci@make@space@other
+  \expandafter\clci@binvernam\expandafter{\clci@natural@key}{#3}%
+  \egroup
+  \clci@make@space@other
 }
 
 \def\clci@binvernam#1#2{%
