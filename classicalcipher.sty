@@ -1,0 +1,534 @@
+%
+% classicalcipher.sty
+%
+
+%%%% package declaration
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{classicalcipher}[2015/10/21 v0.1]
+\def\clci@pkgname{classicalcipher}
+
+%%%% error messages
+\def\clci@pkgname{classicalcipher}
+\def\clci@warn{\PackageWarningNoLine\clci@pkgname}
+\def\clci@error{\PackageError\clci@pkgname}
+
+%%%% counters and ifs
+
+\newcount\clci@result
+\newcount\clci@character
+\newcount\clci@key@a
+\newcount\clci@key@b
+\newcount\clci@length
+\newcount\clci@letter@count
+\newif\ifclci@control@space@
+\clci@control@space@false
+\newif\ifclci@encode@
+\clci@encode@true
+
+%%%% general calculation tool
+
+\def\clci@calc@mod#1#2{%
+  \bgroup
+  \@tempcnta=#1\relax
+  \@tempcntb=#2\relax
+  \@whilenum\@tempcntb>\@tempcnta
+    \do{\advance\@tempcntb-\@tempcnta}%
+  \ifnum\@tempcntb=\@tempcnta
+    \@tempcntb=\z@
+  \fi
+  \global\clci@result=\@tempcntb
+  \egroup
+}
+
+%%%% general spacing tool
+
+\def\clci@control@space{%
+  \ifclci@control@space@
+    \advance\clci@letter@count\@ne
+    \ifnum\clci@letter@count=\clci@length
+      \space\clci@letter@count=\z@
+    \fi
+  \fi
+}
+
+\def\clci@make@space@letter{\catcode32=11\relax}
+\def\clci@make@space@other{\catcode32=10\relax}
+
+\clci@make@space@letter
+\def\clci@space@convert#1{\clci@wordbyword{ }{\ }#1\clci@undefined}
+\clci@make@space@other
+\def\clci@cutoff#1#2{\relax}
+\def\clci@wordbyword#1#2#3{%
+  \ifx#3\clci@undefined\else
+    \ifx#3#1#2\else#3\fi
+    \expandafter\clci@wordbyword\expandafter{\expandafter#1%
+    \expandafter}\expandafter{\expandafter#2\expandafter}%
+  \fi
+}
+
+%%%% Caesar cipher
+
+\def\Caesar{%
+  \@ifnextchar[{\clci@control@ceasar}%
+    {\clci@make@space@letter\clci@natural@ceasar}}
+
+\def\DecodeCaesar{%
+  \@ifnextchar[{\clci@control@decode@ceasar}%
+    {\clci@make@space@letter\clci@natural@decode@ceasar}}
+
+\def\clci@control@ceasar[#1]#2#3{%
+  \bgroup
+  \clci@control@space@true
+  \clci@letter@count=\m@ne
+  \clci@length=#1\relax
+  \clci@caesar{#3}{#2}%
+  \egroup
+}
+
+\def\clci@natural@ceasar#1#2{%
+  \bgroup
+  \expandafter\edef\expandafter\clci@natural@str\expandafter{%
+  \romannumeral-`0\clci@space@convert{#2}}%
+  \expandafter\clci@caesar\expandafter{\clci@natural@str}{#1}%
+  \egroup
+  \clci@make@space@other
+}
+
+\def\clci@control@decode@ceasar[#1]#2#3{%
+  \bgroup
+  \clci@encode@false
+  \clci@control@space@true
+  \clci@letter@count=\m@ne
+  \clci@length=#1\relax
+  \clci@key@a=#2\relax
+  \multiply\clci@key@a\m@ne
+  \clci@caesar{#3}{\clci@key@a}%
+  \egroup
+}
+
+\def\clci@natural@decode@ceasar#1#2{%
+  \bgroup
+  \clci@encode@false
+  \clci@key@a=#1\relax
+  \multiply\clci@key@a\m@ne
+  \expandafter\edef\expandafter\clci@natural@str\expandafter{%
+  \romannumeral-`0\clci@space@convert{#2}}%
+  \expandafter\clci@caesar\expandafter{\clci@natural@str}{\clci@key@a}%
+  \egroup
+  \clci@make@space@other
+}
+
+\def\clci@caesar#1#2{%
+  \bgroup
+  \clci@key@a=#2\relax
+  \ifnum\clci@key@a<\z@
+    \multiply\clci@key@a\m@ne
+    \clci@calc@mod{26}{\clci@key@a}%
+    \clci@key@a=\clci@result
+    \multiply\clci@key@a\m@ne
+    \advance\clci@key@a26
+  \else
+    \clci@calc@mod{26}{\clci@key@a}%
+    \clci@key@a=\clci@result
+  \fi
+  \@tfor\member:=#1\do{%
+    \clci@control@space
+    \clci@character=\expandafter`\member\relax
+    \ifnum\clci@character>`Z
+      \ifnum\clci@character<`a
+        \member
+      \else
+        \ifnum\clci@character>`z
+          \member
+        \else
+          \advance\clci@character\clci@key@a
+          \ifnum\clci@character>`z
+            \advance\clci@character-26
+          \fi
+          \char\clci@character
+        \fi
+      \fi
+    \else
+      \ifnum\clci@character<`A
+        \member
+      \else
+        \ifnum\clci@character>`Z
+          \member
+        \else
+          \advance\clci@character\clci@key@a
+          \ifnum\clci@character>`Z
+            \advance\clci@character-26
+          \fi
+          \char\clci@character
+        \fi
+      \fi
+    \fi
+  }%
+  \egroup
+}
+
+%%%% Affine cipher
+
+\def\Affine{%
+  \@ifnextchar[{\clci@control@affine}%
+    {\clci@make@space@letter\clci@natural@affine}}
+
+\def\DecodeAffine{%
+  \@ifnextchar[{\clci@control@decode@affine}%
+    {\clci@make@space@letter\clci@natural@decode@affine}}
+
+\def\clci@control@affine[#1]#2#3#4{%
+	\bgroup
+	\clci@control@space@true
+	\clci@letter@count=\m@ne
+	\clci@length=#1\relax
+	\clci@affine{#4}{#2}{#3}%
+	\egroup
+}
+
+\def\clci@natural@affine#1#2#3{%
+  \bgroup
+  \expandafter\edef\expandafter\clci@natural@str\expandafter{%
+  \romannumeral-`0\clci@space@convert{#3}}%
+  \expandafter\clci@affine\expandafter{\clci@natural@str}{#1}{#2}%
+  \egroup
+  \clci@make@space@other
+}
+
+\def\clci@control@decode@affine[#1]#2#3#4{%
+  \bgroup
+  \clci@encode@false
+  \clci@control@space@true
+  \clci@letter@count=\m@ne
+  \clci@length=#1\relax
+  \clci@key@a=#2\relax
+  \clci@key@b=#3\relax
+  \ifnum\clci@key@a=1\else\ifnum\clci@key@a=3\clci@key@a=9
+  \else\ifnum\clci@key@a=5\clci@key@a=21\else\ifnum\clci@key@a=7\clci@key@a=15
+  \else\ifnum\clci@key@a=9\clci@key@a=3\else\ifnum\clci@key@a=11\clci@key@a=19
+  \else\ifnum\clci@key@a=15\clci@key@a=7\else\ifnum\clci@key@a=17\clci@key@a=23
+  \else\ifnum\clci@key@a=19\clci@key@a=11\else\ifnum\clci@key@a=21\clci@key@a=5
+  \else\ifnum\clci@key@a=23\clci@key@a=17\else\ifnum\clci@key@a=25\else
+  \clci@error{1st key may be wrong}
+  \fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi
+  \multiply\clci@key@b\m@ne
+  \clci@affine{#4}{\clci@key@a}{\clci@key@b}%
+  \egroup
+}
+
+\def\clci@natural@decode@affine#1#2#3{%
+  \bgroup
+  \clci@encode@false
+  \clci@key@a=#1\relax
+  \clci@key@b=#2\relax
+  \ifnum\clci@key@a=1\else\ifnum\clci@key@a=3\clci@key@a=9
+  \else\ifnum\clci@key@a=5\clci@key@a=21\else\ifnum\clci@key@a=7\clci@key@a=15
+  \else\ifnum\clci@key@a=9\clci@key@a=3\else\ifnum\clci@key@a=11\clci@key@a=19
+  \else\ifnum\clci@key@a=15\clci@key@a=7\else\ifnum\clci@key@a=17\clci@key@a=23
+  \else\ifnum\clci@key@a=19\clci@key@a=11\else\ifnum\clci@key@a=21\clci@key@a=5
+  \else\ifnum\clci@key@a=23\clci@key@a=17\else\ifnum\clci@key@a=25\else
+  \clci@error{1st key may be wrong}
+  \fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi
+  \multiply\clci@key@b\m@ne
+  \expandafter\edef\expandafter\clci@natural@str\expandafter{%
+  \romannumeral-`0\clci@space@convert{#3}}%
+  \expandafter\clci@affine\expandafter{\clci@natural@str}{\clci@key@a}{\clci@key@b}%
+  \egroup
+  \clci@make@space@other
+}
+
+\def\clci@affine#1#2#3{%
+  \bgroup
+    \clci@key@a=#2\relax
+    \clci@key@b=#3\relax
+    \ifnum\clci@key@b<\z@
+      \multiply\clci@key@b\m@ne
+      \clci@calc@mod{26}{\clci@key@b}%
+      \clci@key@b=\clci@result
+      \multiply\clci@key@b\m@ne
+      \advance\clci@key@b26
+    \else
+      \clci@calc@mod{26}{\clci@key@b}%
+      \clci@key@b=\clci@result
+    \fi
+    \@tfor\member:=#1\do{%
+      \clci@control@space
+      \clci@character=\expandafter`\member\relax
+      \ifnum\clci@character>`Z
+        \ifnum\clci@character<`a
+          \member
+        \else
+          \ifnum\clci@character>`z
+            \member
+          \else
+            \advance\clci@character-`a
+            \ifclci@encode@
+              \multiply\clci@character\clci@key@a
+              \advance\clci@character\clci@key@b
+            \else
+              \advance\clci@character\clci@key@b
+              \multiply\clci@character\clci@key@a
+            \fi
+            \clci@calc@mod{26}{\clci@character}%
+            \clci@character=\clci@result
+            \advance\clci@character`a
+            \char\clci@character
+          \fi
+        \fi
+      \else
+        \ifnum\clci@character<`A
+          \member
+        \else
+          \ifnum\clci@character>`Z
+            \member
+          \else
+            \advance\clci@character-`A
+            \ifclci@encode@
+              \multiply\clci@character\clci@key@a
+              \advance\clci@character\clci@key@b
+            \else
+              \advance\clci@character\clci@key@b
+              \multiply\clci@character\clci@key@a
+            \fi
+            \clci@calc@mod{26}{\clci@character}%
+            \clci@character=\clci@result
+            \advance\clci@character`A
+            \char\clci@character
+          \fi
+        \fi
+      \fi
+    }%
+  \egroup
+}
+
+%%%% Tools for Vernam cipher
+
+\def\clci@char@to@bin#1{%
+  \bgroup
+  \@tempcnta=`#1\relax
+  \def\clci@temp@bin{}%
+  \def\clci@add@temp@bin##1{\edef\clci@temp@bin{##1\clci@temp@bin}}%
+  \@whilenum\@tempcnta>\z@\do{%
+    \@tempcntb=\@tempcnta
+    \divide\@tempcntb\tw@
+    \multiply\@tempcntb\tw@
+    \advance\@tempcntb-\@tempcnta
+    \multiply\@tempcntb\m@ne
+    \clci@add@temp@bin{\the\@tempcntb}%
+    \divide\@tempcnta\tw@
+  }%
+  \@tempcntb=\z@
+  \expandafter\@tfor\expandafter\@member\expandafter:\expandafter=\clci@temp@bin\do{%
+    \advance\@tempcntb\@ne
+  }%
+  \ifnum\@tempcntb>7\relax
+    \clci@error{There are illeagal chracters (ascii character only)}
+  \fi
+  \xdef\clci@bin{%
+    \ifcase\@tempcntb\relax0000000\or000000\or00000\or0000\or000\or00\or0\fi
+    \clci@temp@bin
+  }%
+  \egroup
+}
+
+\def\clci@bin@to@char#1{%
+  \bgroup
+  \@tempcnta=#1\relax
+  \@tempcntb=\@ne
+  \global\clci@result=\z@
+  \expandafter\@tfor\expandafter\member\expandafter:\expandafter=\the\@tempcnta\do{%
+    \multiply\@tempcntb\tw@
+  }%
+  \divide\@tempcntb\tw@
+  \expandafter\@tfor\expandafter\member\expandafter:\expandafter=\the\@tempcnta\do{%
+    \@tempcnta=\member\relax
+    \ifnum\@tempcnta=\@ne
+      \advance\clci@result\@tempcntb
+    \fi
+    \divide\@tempcntb\tw@
+  }%
+  \char\clci@result
+  \egroup
+}
+
+\def\clci@get@bin@key#1#2{%
+  \bgroup
+  \@tempcnta=#2\relax
+  \@tempcntb=\z@
+  \clci@result=\m@ne
+  \expandafter\@tfor\expandafter\member\expandafter:\expandafter=#1\do{%
+    \advance\@tempcntb\@ne
+    \ifnum\@tempcnta=\@tempcntb
+      \global\clci@result=\member\relax
+    \fi
+  }%
+  \ifnum\clci@result=\m@ne
+    \clci@error{Too short key}
+  \fi
+  \egroup
+}
+
+%%%% Vernam cipher
+
+\def\Vernam{%
+  \@ifnextchar[{\clci@make@space@letter\clci@control@vernam}%
+    {\clci@make@space@letter\clci@control@vernam[\m@ne]}}
+
+\def\DecodeVernam{%
+  \@ifnextchar[{\clci@make@space@letter\clci@control@decode@vernam}%
+    {\clci@make@space@letter\clci@control@decode@vernam[\m@ne]}}
+
+\def\clci@control@vernam[#1]#2#3{%
+	\bgroup
+	\clci@control@space@true
+	\clci@letter@count=\m@ne
+	\clci@length=#1\relax
+  \expandafter\edef\expandafter\clci@natural@str\expandafter{%
+  \romannumeral-`0\clci@space@convert{#3}}%
+  \expandafter\edef\expandafter\clci@natural@key\expandafter{%
+  \romannumeral-`0\clci@space@convert{#2}}%
+	\expandafter\expandafter\expandafter\clci@vernam\expandafter\expandafter\expandafter
+	  {\expandafter\clci@natural@str\expandafter}\expandafter{\clci@natural@key}%
+	\egroup
+	\clci@make@space@other
+}
+
+\def\clci@control@decode@vernam[#1]#2#3{%
+	\bgroup
+	\clci@encode@false
+	\clci@control@space@true
+	\clci@letter@count=\m@ne
+	\clci@length=#1\relax
+  \expandafter\edef\expandafter\clci@natural@str\expandafter{%
+  \romannumeral-`0\clci@space@convert{#3}}%
+  \expandafter\edef\expandafter\clci@natural@key\expandafter{%
+  \romannumeral-`0\clci@space@convert{#2}}%
+	\expandafter\expandafter\expandafter\clci@vernam\expandafter\expandafter\expandafter
+	  {\expandafter\clci@natural@str\expandafter}\expandafter{\clci@natural@key}%
+	\egroup
+	\clci@make@space@other
+}
+
+\def\clci@vernam#1#2{%
+  \bgroup
+  \def\clci@temp@bin@key{}%
+  \def\clci@add@temp@bin@key##1{\edef\clci@temp@bin@key{\clci@temp@bin@key##1}}%
+  \@tfor\member:=#2\do{%
+    \expandafter\clci@char@to@bin\member
+    \clci@add@temp@bin@key\clci@bin
+  }%
+  \@tempcnta=\z@
+  \def\clci@add@temp@bin@str##1{\edef\clci@temp@bin@str{\clci@temp@bin@str##1}}%
+  \@tfor\member:=#1\do{%
+    \def\clci@temp@bin@str{}%
+    \expandafter\clci@char@to@bin\member
+    \expandafter\@tfor\expandafter\@member\expandafter:\expandafter=\clci@bin\do{%
+      \advance\@tempcnta\@ne
+      \clci@get@bin@key\clci@temp@bin@key\@tempcnta
+      \ifnum\clci@result=\@member
+        \@tempcntb=\z@
+      \else
+        \@tempcntb=\@ne
+      \fi
+      \expandafter\clci@add@temp@bin@str\the\@tempcntb
+    }%
+    \clci@control@space
+    \clci@bin@to@char\clci@temp@bin@str
+  }%
+  \egroup
+}
+
+%%%% Binary Vernam cipher
+
+\def\BinVernam{%
+  \@ifnextchar[{\clci@make@space@letter\clci@control@binvernam}%
+    {\clci@make@space@letter\clci@control@binvernam[\m@ne]}}
+
+\def\DecodeBinVernam{%
+  \@ifnextchar[{\clci@make@space@letter\clci@control@decode@binvernam}%
+    {\clci@make@space@letter\clci@control@decode@binvernam[\m@ne]}}
+
+\def\clci@control@binvernam[#1]#2#3{%
+	\bgroup
+	\clci@control@space@true
+	\clci@letter@count=\m@ne
+	\clci@length=#1\relax
+  \expandafter\edef\expandafter\clci@natural@key\expandafter{%
+  \romannumeral-`0\clci@space@convert{#2}}%
+  \expandafter\edef\expandafter\clci@natural@str\expandafter{%
+  \romannumeral-`0\clci@space@convert{#3}}%
+	\expandafter\expandafter\expandafter\clci@binvernam\expandafter\expandafter\expandafter
+	  {\expandafter\clci@natural@key\expandafter}\expandafter{\clci@natural@str}%
+	\egroup
+	\clci@make@space@other
+}
+
+\def\clci@control@decode@binvernam[#1]#2#3{%
+	\bgroup
+	\clci@encode@false
+	\clci@control@space@true
+	\clci@letter@count=\m@ne
+	\clci@length=#1\relax
+  \expandafter\edef\expandafter\clci@natural@key\expandafter{%
+  \romannumeral-`0\clci@space@convert{#2}}%
+	\expandafter\clci@binvernam\expandafter{\clci@natural@key}{#3}%
+	\egroup
+	\clci@make@space@other
+}
+
+\def\clci@binvernam#1#2{%
+  \bgroup
+  \def\clci@temp@bin@key{}%
+  \def\clci@add@temp@bin@key##1{\edef\clci@temp@bin@key{\clci@temp@bin@key##1}}%
+  \@tfor\member:=#1\do{%
+    \expandafter\clci@char@to@bin\member
+    \clci@add@temp@bin@key\clci@bin
+  }%
+  \@tempcnta=\z@
+  \def\clci@add@temp@bin@str##1{\edef\clci@temp@bin@str{\clci@temp@bin@str##1}}%
+  \ifclci@encode@
+    \@tfor\member:=#2\do{%
+      \def\clci@temp@bin@str{}%
+      \expandafter\clci@char@to@bin\member
+      \expandafter\@tfor\expandafter\@member\expandafter:\expandafter=\clci@bin\do{%
+        \advance\@tempcnta\@ne
+        \clci@get@bin@key\clci@temp@bin@key\@tempcnta
+        \ifnum\clci@result=\@member
+          \@tempcntb=\z@
+        \else
+          \@tempcntb=\@ne
+        \fi
+        \expandafter\clci@add@temp@bin@str\clci@control@space
+        \expandafter\clci@add@temp@bin@str\the\@tempcntb
+      }%
+      \clci@temp@bin@str
+    }%
+  \else
+    \@tempcntb=\z@
+    \def\clci@temp@bin@str{}%
+    \def\clci@add@temp@bin##1{\edef\clci@temp@bin{\clci@temp@bin##1}}%
+    \expandafter\@tfor\expandafter\member\expandafter:\expandafter=#2\do{%
+      \advance\@tempcntb\@ne
+      \clci@add@temp@bin@str\member
+      \ifnum\@tempcntb=7
+        \def\clci@temp@bin{}%
+        \expandafter\@tfor\expandafter\@member\expandafter:\expandafter=\clci@temp@bin@str\do{%
+          \advance\@tempcnta\@ne
+          \clci@get@bin@key\clci@temp@bin@key\@tempcnta
+          \ifnum\clci@result=\@member
+            \clci@character=\z@
+          \else
+            \clci@character=\@ne
+          \fi
+          \expandafter\clci@add@temp@bin\the\clci@character
+        }%
+        \clci@bin@to@char\clci@temp@bin
+        \def\clci@temp@bin@str{}%
+        \@tempcntb=\z@
+      \fi
+    }%
+  \fi
+  \egroup
+}
+
+%% EOF

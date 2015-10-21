@@ -1,0 +1,92 @@
+\documentclass[uplatex]{jsarticle}
+
+\usepackage[T1]{fontenc}
+\usepackage{classicalcipher}
+
+\title{\texttt{classicalcipher.sty} (v0.1) \\ サンプル}
+\author{ワトソン}
+
+\begin{document}
+
+\maketitle
+
+いまここに，あなたの心情を表す英文があります．
+\begin{center}
+I love TeX
+\end{center}
+ちょっと気恥ずかしいので，この文をシーザー暗号という最も古典的かつ単純な方法で
+暗号化してみましょう．
+\begin{center}
+\Caesar{3}{I love TeX}
+\end{center}
+パッと見ただけでは意味がわからなくなりました．しかし元の文のスペースがそのまま
+反映されているため，単語の区切りが丸見えです．適当に2文字区切りにしてしまいましょう．
+\begin{center}
+\Caesar[2]{3}{I love TeX}
+\end{center}
+少しマシになりましたが，まだ平文の大文字・小文字の区別が残ってしまっています．全部
+大文字にしてしまった方が，少しは暗号強度が上がるでしょうか．
+\begin{center}
+\uppercase{\Caesar[2]{3}{I love TeX}}
+\end{center}
+
+次の文字列を見てください．
+\begin{center}
+Lw lv qlfh zhdwkhu wrgdb.
+\end{center}
+意味不明ですね．でも，単純なシーザー暗号なので，すぐに復号化することができてしまいます．
+\begin{center}
+\DecodeCaesar{3}{Lw lv qlfh zhdwkhu wrgdb.}
+\end{center}
+
+今度はこれです．あなたに解読できますか？
+\begin{center}
+\Affine{19}{3}{Hello Brutus}
+\end{center}
+シーザー暗号よりは少し複雑になった，アフィン暗号です．しかし，これも頻度分析と簡単な
+方程式を解けばすぐに鍵が明らかとなります．暗号化に必要な鍵さえわかれば，復号化など
+朝飯前です．
+\begin{center}
+\DecodeAffine{19}{3}{Gbeej Wotath}
+\end{center}
+
+せっかく暗号化するのであれば，やはり解読されたくはないものです．絶対に解読できない暗号
+も使ってみましょう．
+\begin{center}
+\Vernam{15ig;8l8T/*(A4":s}{TeX is Wonderful!}
+\end{center}
+この暗号を用いると，様々な記号がし得るので，タイプライタ体にした方が見やすいかもしれませんね．
+\begin{center}
+\ttfamily
+\Vernam{15ig;8l8T/*(A4":s}{TeX is Wonderful!}
+\end{center}
+このバーナム暗号は鍵を知らないかぎりは絶対に解読できません．逆に，鍵をもつ者であれば，
+暗号化とまったく同じ手順で復号化できます．
+\begin{center}
+\DecodeVernam{15ig;8l8T/*(A4":s}{eP1GRKLo;ANM3RWVR}
+\end{center}
+暗号文からは読み取れませんでしたが，空白や感嘆符の情報も保持されていたようです．
+\begin{center}
+\Vernam{1aig;8l8T/*(A4":s}{TeX is Wonderful!}
+\end{center}
+
+バーナム暗号による暗号化の結果は，すべての文字が扱いやすい文字となるとは限りません．
+\begin{center}
+\ttfamily
+\Vernam{jfakdjgiofj;giasa}{TeX is Wonderful!}
+\end{center}
+印字可能文字の範疇にあればまだいいですが，印字不能な文字に変換されてしまうケースも
+あるかもしれません．そこで，暗号化結果を「文字」に変換せず，2進数のまま出力して
+しまう方法を考えます．
+\begin{center}
+\BinVernam[7]{zxb}{TeX}
+\end{center}
+7文字ずつに区切っていますが，ASCIIコードは7bitなので，それぞれが暗号化前の1文字と
+対応しています．復号化して，3文字になるか確かめてみましょう．
+\begin{center}
+\DecodeBinVernam{zxb}{010111000111010111010}
+\end{center}
+
+
+
+\end{document}
